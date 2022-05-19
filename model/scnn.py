@@ -1,21 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Author: Maosheng Yang, TU Delft (m.yang-2@tudelft.nl)
 
-code for building, training and testing the SCNN model
+build the SCNN convolution
 
 paper: https://arxiv.org/abs/2110.02585
 """
 
-import os 
-import numpy as np 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import time 
-import scipy.sparse as sp
+
 
 class scnn_conv(nn.Module):
-    def __init__(self, F_in, F_out, K1, K2, laplacian_l, laplacian_u, alpha_leaky_relu):
+    def __init__(self, F_in, F_out, K1, K2, laplacian_l, laplacian_u):
         """
         F_in: number of input features per layer 
         F_out: number of output features per layer
@@ -27,28 +26,46 @@ class scnn_conv(nn.Module):
         self.F_out = F_out 
         self.K1 = K1
         self.K2 = K2 
-        self.W = nn.parameter.Parameter(torch.empty(size=(self.K, self.F_in, self.F_out))) # define and initialize the filter weights, which is of dimension K x F_in x F_out 
-        self.leakyrelu = nn.LeakyReLU(alpha_leaky_relu)
-        self.L = laplacian 
+        
+        self.W0 = nn.parameter.Parameter(torch.empty(size=(self.F_in, self.F_out)))
+        self.W1 = nn.parameter.Parameter(torch.empty(size=(self.K1, self.F_in, self.F_out))) 
+        self.W2 = nn.parameter.Parameter(torch.empty(size=(self.K2, self.F_in, self.F_out))) 
+
+        self.Ll = laplacian_l
+        self.Lu = laplacian_u
+
         self.reset_parameters()
-        print("created SNN layers")
+        print("created SCNN layers")
 
     def reset_parameters(self):
         """reinitialize learnable parameters"""
         gain = nn.init.calculate_gain('relu')
-        nn.init.xavier_uniform_(self.W.data, gain=gain)
+        nn.init.xavier_uniform_(self.W0.data, gain=gain)
+        nn.init.xavier_uniform_(self.W1.data, gain=gain)
+        nn.init.xavier_uniform_(self.W2.data, gain=gain)
 
     def forward(self,x):
         """
-        define the simplicial convolution in the SNN architecture (i.e., the simplicial filtering operation)
+        define the simplicial convolution in the SCNN architecture (i.e., the subspace-varying simplicial filtering operation)
         x: input features of dimension M x F_in (num_edges/simplices x num_input features)
         """
         
-        L = self.L 
-        L_k = torch.eye(L.size(dim=0)).requires_grad_(False) # the identity matrix
-        y_k = L_k @ torch.clone(x @ self.W[0]) # this is the 0th term
-        for k in range(1,self.K):
-            L_k = L_k @ L 
-            y_k += L_k @ x @ self.W[k]
+        Ll = self.Ll 
+        Lu = self.Lu 
+        dim_simp = Ll.size(dim=0)
+        I = torch.eye(dim_simp).requires_grad_(False) # the identity matrix
+        y_0 = I @ torch.clone(x @ self.W0) # this is the 0th term
 
-        return y_k 
+        y_1 = torch.empty(size=(dim_simp, self.F_out))
+        L_1 = I 
+        for k in range(0,self.K1):
+            L_1 = L_1 @ Ll 
+            y_1 += L_1 @ x @ self.W1[k]
+
+        y_2 = torch.empty(size=(dim_simp, self.F_out))
+        L_2 = I
+        for k in range(0,self.K2):
+            L_2 = L_2 @ Lu
+            y_2 += L_2 @ x @ self.W2[k]
+
+        return y_0 + y_1 + y_2 

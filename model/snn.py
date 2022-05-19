@@ -1,21 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Author: Maosheng Yang, TU Delft (m.yang-2@tudelft.nl)
 
-code for building, training and testing a SNN model
+build the SNN convolution
 
 paper: https://arxiv.org/abs/2010.03633
 """
 
-import os 
-import numpy as np 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import time 
-import scipy.sparse as sp
+
 
 class snn_conv(nn.Module):
-    def __init__(self, F_in, F_out, K, laplacian, alpha_leaky_relu):
+    def __init__(self, F_in, F_out, K, laplacian):
         """
         F_in: number of input features per layer 
         F_out: number of output features per layer
@@ -24,11 +23,12 @@ class snn_conv(nn.Module):
         self.F_in = F_in
         self.F_out = F_out 
         self.K = K 
+
         # define the filter weights, which is of dimension K x F_in x F_out
         self.W = nn.parameter.Parameter(torch.empty(size=(self.K, self.F_in, self.F_out)))  
-        # when alpha=0, it becomes relu
-        self.leakyrelu = nn.LeakyReLU(alpha_leaky_relu) 
+
         self.L = laplacian 
+
         self.reset_parameters()
         print("created SNN layers")
 
