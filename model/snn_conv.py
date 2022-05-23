@@ -14,6 +14,7 @@ import torch.nn.functional as F
 
 
 class snn_conv(nn.Module):
+    
     def __init__(self, F_in, F_out, K, laplacian):
         """
         F_in: number of input features per layer 
