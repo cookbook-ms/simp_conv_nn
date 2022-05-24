@@ -14,7 +14,7 @@ from collections import defaultdict
 
 
 class CollaborationComplex(torch.utils.data.Dataset):
-    def __init__(self, pct_miss, order, id_rlz, eps=0.9, kappa=5, device='cpu', starting_node=150250, data_path=r"data/collaboration_complex",):
+    def __init__(self, pct_miss, order, id_rlz, eps=0.9, kappa=5, starting_node=150250, data_path=r"data/collaboration_complex",):
         """
         pct_miss: the missing percentage 10,20,30,...,,60
         order: the simplices order 0,1,2,...,5
@@ -62,13 +62,14 @@ class CollaborationComplex(torch.utils.data.Dataset):
         # convert to tensors 
         masks = [torch.tensor(list(mask.values()), dtype=torch.long) for mask in masks]
 
-        self.X = observed_signal[order].reshape(-1,1).to(device)
-        self.y = target_signal[order].to(device)
+        # only take the corresponding order, the order of interest 
+        self.X = observed_signal[order].reshape(-1,1)
+        self.y = target_signal[order]
         self.n = len(self.X)
-        self.mask = masks[order].to(device)
-        self.L = L_hodge.to(device)
-        self.L_l = L_l.to(device)
-        self.L_u = L_u.to(device)
+        self.mask = masks[order]
+        self.L = L_hodge
+        self.L_l = L_l
+        self.L_u = L_u
         self.proj = projection_matrix
 
     def __getitem__(self, index):

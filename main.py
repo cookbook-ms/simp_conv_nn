@@ -16,7 +16,12 @@ from data import *
 device = torch.device("cuda" if torch.cuda.is_available() else torch.device("cpu"))
 
 # collaboration complex 
-cc = CollaborationComplex(10,1,0)
+cc = CollaborationComplex(pct_miss=50, order=5, id_rlz=2)
 
-print(cc.n)
-print(cc.X)
+# print(cc.n)
+# print(cc.X)
+# print(cc.L.shape)
+# print(cc.L_l)
+# print(cc.L_u)
+# print(cc.proj.shape)
+

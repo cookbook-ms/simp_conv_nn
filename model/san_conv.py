@@ -15,7 +15,7 @@ import torch.nn.functional as F
 
 class san_conv(nn.Module):
 
-    def __init__(self, F_in, F_out, laplacian_l, laplacian_u, projection_matrix, K1, K2, p_dropout, alpha_leaky_relu):
+    def __init__(self, F_in, F_out, K1, K2,laplacian_l, laplacian_u, projection_matrix,  p_dropout=0.0, alpha_leaky_relu=0.2):
         """
         F_in: Numer of features of the input signal
         F_out: Numer of features of the output *component*
