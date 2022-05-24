@@ -129,7 +129,7 @@ class conv2nn(pl.LightningModule):
         else:
             x, y = batch
             mask = range(len(y))
-        y = y#.unsqueeze(0)
+        #y = y.unsqueeze(0)
         y_hat = self(x).squeeze(0)
 
         loss = self.loss_fn(y_hat[mask], y[mask])
