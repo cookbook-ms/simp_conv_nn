@@ -71,19 +71,19 @@ class conv2nn(pl.LightningModule):
         nn_layer = []
         # define the NN layer operations for each model
         if model == 'snn':
-            for l in range(self.    num_layers-1):
-                hyperparameters = {"F_in":self.num_features[l],"F_out":self.num_features[l+1],"K":self.K,"lapalcian":self.L}
+            for l in range(self.num_layers-1):
+                hyperparameters = {"F_in":self.num_features[l],"F_out":self.num_features[l+1],"K":self.K,"laplacian":self.L}
                 nn_layer.extend([snn_conv(**hyperparameters).to(device), self.sigma])
 
         elif model == 'scnn': 
-            for l in range(self.    num_layers-1):
-                hyperparameters = {"F_in":self.num_features[l],"F_out":self.num_features[l+1],"K1":self.K1, "K2":self.K2,"lapalcian_l":self.L_l,"laplacian_u":self.L_u}
+            for l in range(self.num_layers-1):
+                hyperparameters = {"F_in":self.num_features[l],"F_out":self.num_features[l+1],"K1":self.K1, "K2":self.K2,"laplacian_l":self.L_l,"laplacian_u":self.L_u}
                 nn_layer.extend([scnn_conv(**hyperparameters).to(device), self.sigma])
 
         elif model == 'psnn':
             for l in range(self.num_layers-1): 
                 hyperparameters = {
-                    "F_in":self.num_features[l], "F_out":self.num_features[l+1],"lapalcian_l":self.L_l,"laplacian_u":self.L_u
+                    "F_in":self.num_features[l], "F_out":self.num_features[l+1],"laplacian_l":self.L_l,"laplacian_u":self.L_u
                 }
                 nn_layer.extend([psnn_conv(**hyperparameters).to(device), self.sigma])
 
@@ -109,8 +109,7 @@ class conv2nn(pl.LightningModule):
             x, y, mask = batch 
         else:
             x, y = batch
-            mask = range(len(y)
-            )
+            mask = range(len(y))
         
         y_hat = self(x).squeeze(0) 
         
@@ -121,6 +120,7 @@ class conv2nn(pl.LightningModule):
         self.max_acc = max(self.acc, self.max_acc) 
         self.log('training_accuracy', self.acc, on_step=False, on_epoch=True, prog_bar=True)
         self.log('training_loss', loss.item(), on_step=True, on_epoch=True, prog_bar=True)
+        return loss 
         
     def validation_step(self, batch, batch_idx):
         x, y = batch
