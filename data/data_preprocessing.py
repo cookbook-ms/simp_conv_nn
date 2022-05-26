@@ -61,6 +61,7 @@ class CollaborationComplex(torch.utils.data.Dataset):
         masks = np.load('{}/{}_percentage_{}_known_values_{}.npy'.format(data_path, starting_node, pct_miss, id_rlz), allow_pickle=True)  # positive mask= indices that we keep ##1 mask #entries 0 degree 
         # convert to tensors 
         masks = [torch.tensor(list(mask.values()), dtype=torch.long) for mask in masks]
+        print([torch.tensor(list(mask.values())) for mask in masks])
 
         # only take the corresponding order, the order of interest 
         self.X = observed_signal[order].reshape(-1,1)
