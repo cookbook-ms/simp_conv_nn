@@ -56,16 +56,16 @@ class scnn_conv(nn.Module):
         I = torch.eye(dim_simp).requires_grad_(False) # the identity matrix
         y_0 = I @ torch.clone(x @ self.W0) # this is the 0th term
 
-        y_1 = torch.empty(size=(dim_simp, self.F_out))
-        L_1 = I 
+        #y_1 = torch.empty(size=(dim_simp, self.F_out))
+        
         for k in range(0,self.K1):
-            L_1 = L_1 @ Ll 
-            y_1 += L_1 @ x @ self.W1[k]
+            y_0 += Ll @ x @ self.W1[k]
+            Ll = Ll @ Ll
 
-        y_2 = torch.empty(size=(dim_simp, self.F_out))
-        L_2 = I
+        #y_2 = torch.empty(size=(dim_simp, self.F_out))
+        
         for k in range(0,self.K2):
-            L_2 = L_2 @ Lu
-            y_2 += L_2 @ x @ self.W2[k]
+            y_0 += Lu @ x @ self.W2[k]
+            Lu = Lu @ Lu
 
-        return y_0 + y_1 + y_2 
+        return y_0 #+ y_1 + y_2 

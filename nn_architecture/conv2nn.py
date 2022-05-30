@@ -14,6 +14,7 @@ import sys
 sys.path.append(".")
 sys.path.append("..")
 
+import numpy as np
 import torch
 import torchmetrics
 import torch.nn as nn
@@ -107,19 +108,30 @@ class conv2nn(pl.LightningModule):
     def training_step(self, batch, batch_idx): 
         if len(batch) == 3:
             x, y, mask = batch 
+            print("loss and acc evaluated on the known and unknown")
         else:
             x, y = batch
             mask = range(len(y))
+            print("loss and acc evaluated on the whole")
         
+        print(len(mask)/len(y))
+        #print(mask)
         y_hat = self(x).squeeze(0) 
         
         loss = self.loss_fn(y_hat[mask],y[mask])
         #self.train_acc(y_hat,y)
         #self.val_acc(y_hat,y)
-        self.acc = ((y.float()-y_hat).abs() <= (0.05*y).abs()).sum() / len(y)
+        t1 = mask.numpy() 
+        #print(len(t1))
+        t2 = np.array(range(len(y)))
+        #print(t2)
+        mask_pred = torch.tensor(np.setdiff1d(t2,t1))
+        # print(mask_pred)
+        self.acc = ((y[mask_pred].float()-y_hat[mask_pred]).abs() <= (0.05*y[mask_pred]).abs()).sum() / len(y[mask_pred])
+        
         self.max_acc = max(self.acc, self.max_acc) 
-        self.log('training_accuracy', self.acc, on_step=False, on_epoch=True, prog_bar=True)
-        self.log('training_loss', loss.item(), on_step=True, on_epoch=True, prog_bar=True)
+        self.log('training_accuracy:', self.acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('training_loss:', loss.item(), on_step=False, on_epoch=True, prog_bar=True)
         return loss 
         
     def validation_step(self, batch, batch_idx):
@@ -153,4 +165,4 @@ class conv2nn(pl.LightningModule):
                                       patience=100,
                                       min_lr=7e-5,
                                       verbose=True)
-        return {'optimizer': optimizer, 'lr_scheduler': scheduler, 'monitor': 'training_loss'}
+        return {'optimizer': optimizer, 'lr_scheduler': scheduler, 'monitor': 'training_loss:'}

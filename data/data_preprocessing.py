@@ -61,7 +61,7 @@ class CollaborationComplex(torch.utils.data.Dataset):
         masks = np.load('{}/{}_percentage_{}_known_values_{}.npy'.format(data_path, starting_node, pct_miss, id_rlz), allow_pickle=True)  # positive mask= indices that we keep ##1 mask #entries 0 degree 
         # convert to tensors 
         masks = [torch.tensor(list(mask.values()), dtype=torch.long) for mask in masks]
-        print([torch.tensor(list(mask.values())) for mask in masks])
+        print(len(masks))
 
         # only take the corresponding order, the order of interest 
         self.X = observed_signal[order].reshape(-1,1)
@@ -74,8 +74,9 @@ class CollaborationComplex(torch.utils.data.Dataset):
         self.proj = projection_matrix
 
     def __getitem__(self, index):
-        return self.X, self.y
+        # if self.mask is returned too, then we evaluate the loss over the known values, and we can also evaluate the accuracy only on the predicted ones; otherwise, both loss and accuracy are evaluated on the whole list
+        return self.X, self.y, self.mask
 
     def __len__(self):
         # Returns length
-        return 1000
+        return 1
