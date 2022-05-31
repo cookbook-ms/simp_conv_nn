@@ -61,7 +61,7 @@ class conv2nn(pl.LightningModule):
         self.K = K
         self.K1 = K1
         self.K2 = K2 
-
+        print(K1,K2)
         self.L = laplacian
         self.L_l = laplacian_l
         self.L_u = laplacian_u 
@@ -115,9 +115,10 @@ class conv2nn(pl.LightningModule):
             print("loss and acc evaluated on the whole")
         
         print(len(mask)/len(y))
-        #print(mask)
-        y_hat = self(x).squeeze(0) 
-        
+        print(x)
+        y_hat = self(x).squeeze(0)
+        print(len(y_hat))
+        loss_in = self.loss_fn(x[mask],y[mask])
         loss = self.loss_fn(y_hat[mask],y[mask])
         #self.train_acc(y_hat,y)
         #self.val_acc(y_hat,y)
@@ -126,11 +127,19 @@ class conv2nn(pl.LightningModule):
         t2 = np.array(range(len(y)))
         #print(t2)
         mask_pred = torch.tensor(np.setdiff1d(t2,t1))
-        # print(mask_pred)
         self.acc = ((y[mask_pred].float()-y_hat[mask_pred]).abs() <= (0.05*y[mask_pred]).abs()).sum() / len(y[mask_pred])
+        print(mask)
+        print((y[mask]-x[mask]).size())
+        print(mask_pred)
+        print((x[mask_pred].float()))
+        print(y[(range(len(y)))])
+        
+        self.acc_in = ((y.float()-x).abs() <= (0.05*y).abs()).sum() / len(y)
         
         self.max_acc = max(self.acc, self.max_acc) 
-        self.log('training_accuracy:', self.acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('input_acc:', self.acc_in, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('training_acc:', self.acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('input_loss:', loss_in.item(), on_step=False, on_epoch=True, prog_bar=True)
         self.log('training_loss:', loss.item(), on_step=False, on_epoch=True, prog_bar=True)
         return loss 
         

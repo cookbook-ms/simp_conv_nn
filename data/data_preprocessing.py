@@ -64,8 +64,11 @@ class CollaborationComplex(torch.utils.data.Dataset):
         print(len(masks))
 
         # only take the corresponding order, the order of interest 
-        self.X = observed_signal[order].reshape(-1,1)
+        self.X = observed_signal[order] 
+        print(self.X)
+        
         self.y = target_signal[order]
+        print(self.y)
         self.n = len(self.X)
         self.mask = masks[order]
         self.L = L_hodge

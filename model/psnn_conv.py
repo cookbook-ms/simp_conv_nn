@@ -44,12 +44,12 @@ class psnn_conv(nn.Module):
         define the simplicial convolution in the PSNN architecture (i.e., the subspace-varying simplicial filtering operation but with order 1 on the lower and upper laplacians)
         x: input features of dimension M x F_in (num_edges/simplices x num_input features)
         """
-        
+        x = torch.reshape(x,(x.size(dim=0),self.F_in)) 
         Ll = self.Ll 
         Lu = self.Lu 
         dim_simp = Ll.size(dim=0)
         I = torch.eye(dim_simp).requires_grad_(False) # the identity matrix
-        y_0 = I @ torch.clone(x @ self.W0) # this is the 0th term
+        y_0 = I @ x @ self.W0 # this is the 0th term
 
         y_1 = Ll @ x @ self.W1
 
