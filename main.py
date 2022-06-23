@@ -21,7 +21,7 @@ starting_node=150250
 data_path=r"data/collaboration_complex"
 pct_miss = 50
 id_rlz = 8
-order = 3
+order = 0
 
 # masks
 masks = np.load('{}/{}_percentage_{}_known_values_{}.npy'.format(data_path, starting_node, pct_miss, id_rlz), allow_pickle=True)  # positive mask= indices that we keep ##1 mask #entries 0 degree # convert to tensors 
@@ -45,7 +45,7 @@ print(cc.proj.shape)
 simplicial_nn = conv2nn(F_in=1, F_intermediate=[64,64], F_out=1, K=5, K1=5, K2=5, laplacian=cc.L, laplacian_l=cc.L_l, laplacian_u=cc.L_u, projection_matrix=cc.proj, sigma=nn.ReLU(), device=device, model='psnn')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-e", "--max_epochs", help="Maximum number of epochs", type=int, default=10)
+parser.add_argument("-e", "--max_epochs", help="Maximum number of epochs", type=int, default=500)
 parser.add_argument("-f", "--features", help="number of per layer features i.e. [5,5]", type=str, default="[5,5]")
 # parser.add_argument("-d", "--dense", help="number of per  dense layer features i.e. [5,5]", type=str,  default="[]")
 parser.add_argument("-lr", "--learning_rate", help="learning rate i.e. 0.001", type=float, default=0.001)
